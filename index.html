@@ -61,6 +61,7 @@
           const [currentStep, setCurrentStep] = useState(0);
           const [answers, setAnswers] = useState({});
           const [result, setResult] = useState(null);
+          const [showDetailedResult, setShowDetailedResult] = useState(false);
 
           // 간단한 페이지 설정 (복잡한 복원 로직 제거)
           useEffect(() => {
@@ -927,111 +928,184 @@
 
           // 결과 화면
           if (result) {
-            return (
-              <div className="max-w-4xl mx-auto p-6 bg-gradient-to-br from-amber-50 to-orange-50 min-h-screen">
-                <div className="bg-white rounded-2xl shadow-2xl p-8">
-                  <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-amber-800 mb-2">🥃 당신만의 위스키를 찾았습니다!</h1>
-                    <p className="text-gray-600">취향 분석을 바탕으로 엄선한 추천 위스키들이에요</p>
+            const topWhisky = result[0];
+            
+            if (!showDetailedResult) {
+              // 스크린샷 최적화 화면
+              return (
+                <div className="w-full min-h-screen bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 relative overflow-hidden">
+                  {/* 배경 패턴 */}
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-10 left-10 text-6xl">🥃</div>
+                    <div className="absolute top-32 right-8 text-4xl">✨</div>
+                    <div className="absolute bottom-40 left-8 text-5xl">🔥</div>
+                    <div className="absolute bottom-20 right-12 text-3xl">⭐</div>
                   </div>
 
-                  <div className="space-y-6">
-                    {result.map((whisky, index) => (
-                      <div key={index} className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-xl p-6 border-2 border-amber-200">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="bg-amber-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
-                              {index + 1}
-                            </div>
-                            <h3 className="text-xl font-bold text-amber-900">{whisky.name}</h3>
-                            <div className="flex items-center gap-1">
-                              <span className="text-sm text-gray-600">추천도:</span>
-                              <div className="flex text-amber-500">
-                                {[...Array(Math.min(5, Math.max(1, Math.round((whisky.matchPercentage / 100) * 5))))].map((_, i) => (
-                                  <Star key={i} />
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="bg-amber-200 px-3 py-1 rounded-full text-sm font-medium text-amber-800">
-                            매칭도: {whisky.matchPercentage}%
-                          </div>
-                        </div>
+                  {/* 메인 컨텐츠 */}
+                  <div className="relative z-10 flex flex-col justify-between min-h-screen p-6 text-white">
+                    
+                    {/* 헤더 */}
+                    <div className="text-center pt-8">
+                      <div className="text-6xl mb-4">🥃</div>
+                      <h1 className="text-2xl font-black mb-2">나만의 위스키 찾기</h1>
+                      <p className="text-lg opacity-90">MBTI 스타일 취향 분석 완료!</p>
+                    </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-sm text-gray-700">
-                              <MapPin />
-                              <span>{whisky.region}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-700">
-                              <Zap />
-                              <span>도수: {whisky.abv}%</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-700">
-                              <Grape />
-                              <span>{whisky.price}</span>
+                    {/* 결과 카드 */}
+                    <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 mx-4 shadow-2xl">
+                      <div className="text-center mb-6">
+                        <div className="text-4xl mb-3">🏆</div>
+                        <h2 className="text-2xl font-black text-gray-800 mb-2">당신의 위스키는</h2>
+                        <h3 className="text-3xl font-black text-amber-600 mb-4">{topWhisky.name}</h3>
+                        
+                        {/* 매칭도 원형 게이지 */}
+                        <div className="relative w-24 h-24 mx-auto mb-4">
+                          <div className="w-24 h-24 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center">
+                            <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center">
+                              <span className="text-xl font-black text-amber-600">{topWhisky.matchPercentage}%</span>
                             </div>
                           </div>
                         </div>
+                      </div>
 
-                        <p className="text-gray-700 mb-2">{whisky.description}</p>
-                        <p className="text-sm text-gray-600 bg-white p-3 rounded-lg">
-                          <strong>테이스팅 노트:</strong> {whisky.notes}
+                      {/* 위스키 정보 */}
+                      <div className="space-y-3 text-center">
+                        <div className="flex items-center justify-center gap-2 text-gray-700">
+                          <span className="text-xl">📍</span>
+                          <span className="font-bold">{topWhisky.region}</span>
+                        </div>
+                        <div className="flex items-center justify-center gap-2 text-gray-700">
+                          <span className="text-xl">⚡</span>
+                          <span className="font-bold">도수 {topWhisky.abv}%</span>
+                        </div>
+                        <div className="flex items-center justify-center gap-2 text-gray-700">
+                          <span className="text-xl">💰</span>
+                          <span className="font-bold">{topWhisky.price}</span>
+                        </div>
+                      </div>
+
+                      {/* 설명 */}
+                      <div className="mt-6 p-4 bg-amber-50 rounded-2xl">
+                        <p className="text-sm text-gray-700 font-medium text-center leading-relaxed">
+                          {topWhisky.description}
                         </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-8 text-center space-y-4">
-                    <div className="mb-6">
-                      <h4 className="text-lg font-bold text-gray-800 mb-4">📢 결과 공유하기</h4>
-                      
-                      {/* 간단한 공유 가이드 */}
-                      <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-xl mb-4">
-                        <h5 className="font-bold text-gray-800 mb-3">📱 인스타그램 스토리 공유법</h5>
-                        <div className="text-sm text-gray-700 text-left space-y-1">
-                          <p><strong>📸 스크린샷 방법 (가장 간단!):</strong></p>
-                          <p>1. 📷 이 화면 스크린샷 찍기</p>
-                          <p>2. 📱 인스타그램 스토리 → 갤러리에서 스크린샷 선택</p>
-                          <p>3. 🔗 링크 스티커 추가해서 친구들 초대!</p>
-                          <br/>
-                          <p><strong>🖼️ 이미지 다운로드 방법:</strong></p>
-                          <p>• 아래 버튼으로 전용 이미지 다운로드 가능</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-wrap justify-center gap-3">
-                        <button
-                          onClick={shareToInstagram}
-                          className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-green-500 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-green-600 transition-colors font-medium"
-                        >
-                          📱 인스타그램에 공유하기
-                        </button>
                       </div>
                     </div>
 
-                    <button
-                      onClick={resetTest}
-                      className="inline-flex items-center gap-2 bg-amber-600 text-white px-6 py-3 rounded-xl hover:bg-amber-700 transition-colors font-medium"
-                    >
-                      <RotateCcw />
-                      처음으로 돌아가기
-                    </button>
-                  </div>
+                    {/* 하단 CTA */}
+                    <div className="text-center pb-8 space-y-4">
+                      <div className="mb-4">
+                        <p className="text-lg font-bold mb-2">🎯 나도 테스트해보기</p>
+                        <p className="text-sm opacity-90">whisky-recommendation.vercel.app</p>
+                      </div>
+                      
+                      <button
+                        onClick={shareToInstagram}
+                        className="bg-white/20 backdrop-blur-sm border-2 border-white/50 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-white/30 transition-all w-full max-w-xs"
+                      >
+                        📱 인스타그램 공유하기
+                      </button>
+                      
+                      <button
+                        onClick={() => setShowDetailedResult(true)}
+                        className="bg-white text-amber-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 transition-all"
+                      >
+                        📋 상세 결과 보기
+                      </button>
+                      
+                      <button
+                        onClick={resetTest}
+                        className="text-white/80 underline text-sm hover:text-white transition-colors block"
+                      >
+                        🔄 다시 테스트하기
+                      </button>
+                    </div>
 
-                  <div className="mt-8 p-4 bg-amber-50 rounded-xl">
-                    <h4 className="font-bold text-amber-800 mb-2">💡 초보자를 위한 팁</h4>
-                    <ul className="text-sm text-gray-700 space-y-1">
-                      <li>• 처음엔 스트레이트보다 온더락이나 하이볼로 시작해보세요</li>
-                      <li>• 위스키 전용 글라스를 사용하면 향을 더 잘 느낄 수 있어요</li>
-                      <li>• 물을 한두 방울 떨어뜨리면 향이 더 활짝 열립니다</li>
-                      <li>• 천천히 음미하며 마시는 것이 포인트예요</li>
-                    </ul>
                   </div>
                 </div>
-              </div>
-            );
+              );
+            } else {
+              // 상세 결과 화면 (기존 디자인 유지)
+              return (
+                <div className="max-w-4xl mx-auto p-6 bg-gradient-to-br from-amber-50 to-orange-50 min-h-screen">
+                  <div className="bg-white rounded-2xl shadow-2xl p-8">
+                    
+                    {/* 뒤로 가기 버튼 */}
+                    <button
+                      onClick={() => setShowDetailedResult(false)}
+                      className="flex items-center gap-2 text-amber-600 hover:text-amber-700 mb-6 font-medium"
+                    >
+                      <ChevronLeft />
+                      스크린샷용 화면으로
+                    </button>
+
+                    <div className="text-center mb-8">
+                      <h1 className="text-3xl font-bold text-amber-800 mb-2">🥃 당신만의 위스키 상세 결과</h1>
+                      <p className="text-gray-600">취향 분석을 바탕으로 엄선한 추천 위스키들이에요</p>
+                    </div>
+
+                    <div className="space-y-6">
+                      {result.map((whisky, index) => (
+                        <div key={index} className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-xl p-6 border-2 border-amber-200">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-amber-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                                {index + 1}
+                              </div>
+                              <h3 className="text-xl font-bold text-amber-900">{whisky.name}</h3>
+                              <div className="flex items-center gap-1">
+                                <span className="text-sm text-gray-600">추천도:</span>
+                                <div className="flex text-amber-500">
+                                  {[...Array(Math.min(5, Math.max(1, Math.round((whisky.matchPercentage / 100) * 5))))].map((_, i) => (
+                                    <Star key={i} />
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="bg-amber-200 px-3 py-1 rounded-full text-sm font-medium text-amber-800">
+                              매칭도: {whisky.matchPercentage}%
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-sm text-gray-700">
+                                <MapPin />
+                                <span>{whisky.region}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-gray-700">
+                                <Zap />
+                                <span>도수: {whisky.abv}%</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-gray-700">
+                                <Grape />
+                                <span>{whisky.price}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <p className="text-gray-700 mb-2">{whisky.description}</p>
+                          <p className="text-sm text-gray-600 bg-white p-3 rounded-lg">
+                            <strong>테이스팅 노트:</strong> {whisky.notes}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-8 p-4 bg-amber-50 rounded-xl">
+                      <h4 className="font-bold text-amber-800 mb-2">💡 초보자를 위한 팁</h4>
+                      <ul className="text-sm text-gray-700 space-y-1">
+                        <li>• 처음엔 스트레이트보다 온더락이나 하이볼로 시작해보세요</li>
+                        <li>• 위스키 전용 글라스를 사용하면 향을 더 잘 느낄 수 있어요</li>
+                        <li>• 물을 한두 방울 떨어뜨리면 향이 더 활짝 열립니다</li>
+                        <li>• 천천히 음미하며 마시는 것이 포인트예요</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
           }
 
           return null;
