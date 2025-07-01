@@ -603,93 +603,102 @@
             const topWhisky = result[0];
             const serviceUrl = window.location.href;
             
-            // 1단계: 이미지 다운로드
-            const canvas = generateResultImage();
-            canvas.toBlob((blob) => {
-              const url = URL.createObjectURL(blob);
+            try {
+              // 1단계: 이미지 생성 및 자동 다운로드
+              const canvas = generateResultImage();
+              
+              // DataURL 방식으로 더 확실한 다운로드
+              const dataURL = canvas.toDataURL('image/png');
               const link = document.createElement('a');
               link.download = `위스키추천_${topWhisky.name.replace(/\s+/g, '_')}.png`;
-              link.href = url;
+              link.href = dataURL;
+              
+              // 자동 다운로드 실행
               document.body.appendChild(link);
               link.click();
               document.body.removeChild(link);
-              URL.revokeObjectURL(url);
 
               // 이미지 다운로드 추적
               trackEvent('Result Image Downloaded', {
                 whiskyName: topWhisky.name
               });
 
-              // 2단계: 사용자 확인 후 링크 복사
-              setTimeout(() => {
-                const userConfirmed = confirm(`📷 이미지 다운로드가 시작되었습니다!
-
-다운로드가 완료되었다면 "확인"을 클릭하세요.
-링크가 자동으로 복사됩니다.
-
-📱 다운로드 완료 후 확인을 클릭하세요!`);
+              // 2단계: 링크 자동 복사 (즉시 실행)
+              navigator.clipboard.writeText(serviceUrl).then(() => {
+                trackEvent('Service URL Copied');
                 
-                if (userConfirmed) {
-                  // 링크 자동 복사
-                  navigator.clipboard.writeText(serviceUrl).then(() => {
-                    trackEvent('Service URL Copied');
-                    
-                    alert(`✅ 링크가 자동으로 복사되었습니다!
+                alert(`✅ 모든 준비 완료!
+
+📷 이미지가 자동으로 다운로드되었습니다
+🔗 링크가 자동으로 복사되었습니다
 
 📱 인스타그램 스토리에서:
-1. 📷 갤러리에서 다운로드한 이미지 선택
+1. 📷 갤러리에서 다운로드된 이미지 선택
 2. ✏️ 원하는 텍스트 작성  
 3. 🔗 링크 스티커 추가 → 복사된 링크 붙여넣기
 4. 📤 스토리 게시!
 
 인스타그램이 자동으로 열립니다...`);
-                    
-                    // 인스타그램 실행
-                    setTimeout(() => {
-                      if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                        window.location.href = 'instagram://story-camera';
-                      } else {
-                        window.open('https://www.instagram.com/stories/create/', '_blank');
-                      }
-                    }, 1500);
-                    
-                  }).catch(() => {
-                    // 클립보드 실패 시 대체 방법 (자동 선택)
-                    const textArea = document.createElement('textarea');
-                    textArea.value = serviceUrl;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textArea);
-                    
-                    alert(`✅ 링크가 복사되었습니다!
+                
+                // 인스타그램 실행
+                setTimeout(() => {
+                  if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    window.location.href = 'instagram://story-camera';
+                  } else {
+                    window.open('https://www.instagram.com/stories/create/', '_blank');
+                  }
+                }, 2000);
+                
+              }).catch(() => {
+                // 클립보드 실패 시 대체 방법 (자동 선택)
+                try {
+                  const textArea = document.createElement('textarea');
+                  textArea.value = serviceUrl;
+                  textArea.style.position = 'fixed';
+                  textArea.style.left = '-9999px';
+                  document.body.appendChild(textArea);
+                  textArea.select();
+                  textArea.setSelectionRange(0, 99999);
+                  document.execCommand('copy');
+                  document.body.removeChild(textArea);
+                  
+                  alert(`✅ 모든 준비 완료!
+
+📷 이미지가 자동으로 다운로드되었습니다
+🔗 링크가 자동으로 복사되었습니다
 
 📱 인스타그램 스토리에서:
-1. 📷 갤러리에서 다운로드한 이미지 선택
+1. 📷 갤러리에서 다운로드된 이미지 선택
 2. ✏️ 원하는 텍스트 작성
 3. 🔗 링크 스티커 추가 → 복사된 링크 붙여넣기
 4. 📤 스토리 게시!
 
 인스타그램이 자동으로 열립니다...`);
-                    
-                    // 인스타그램 실행
-                    setTimeout(() => {
-                      if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                        window.location.href = 'instagram://story-camera';
-                      } else {
-                        window.open('https://www.instagram.com/stories/create/', '_blank');
-                      }
-                    }, 1500);
-                  });
+                  
+                } catch (copyError) {
+                  alert(`📷 이미지가 다운로드되었습니다!
+
+🔗 링크를 수동으로 복사해주세요:
+${serviceUrl}
+
+📱 인스타그램 스토리에서 링크 스티커에 붙여넣어주세요!`);
                 }
-              }, 1000); // 1초 후 확인 대화상자 표시
+                
+                // 인스타그램 실행
+                setTimeout(() => {
+                  if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    window.location.href = 'instagram://story-camera';
+                  } else {
+                    window.open('https://www.instagram.com/stories/create/', '_blank');
+                  }
+                }, 2000);
+              });
               
-            }, 'image/png');
+            } catch (error) {
+              console.error('Image generation error:', error);
+              alert('이미지 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
+            }
           };
-
-
-
-
 
           // 랜딩 페이지
           if (currentScreen === 'landing') {
