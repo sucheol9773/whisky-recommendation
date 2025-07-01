@@ -20,6 +20,9 @@
     
     <meta name="theme-color" content="#f59e0b">
     
+    <!-- Vercel Analytics -->
+    <script defer src="https://analytics.vercel-insights.com/script.js"></script>
+    
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -37,6 +40,13 @@
     <script type="text/babel">
         const { useState } = React;
 
+        // Analytics 추적 함수
+        const trackEvent = (eventName, properties = {}) => {
+          if (typeof va !== 'undefined') {
+            va('track', eventName, properties);
+          }
+        };
+
         // 간단한 아이콘 컴포넌트들
         const ChevronRight = () => <span>→</span>;
         const ChevronLeft = () => <span>←</span>;
@@ -53,10 +63,14 @@
           const [result, setResult] = useState(null);
 
           const startTest = () => {
+            // 테스트 시작 추적
+            trackEvent('Test Started');
             setCurrentScreen('test');
           };
 
           const resetTest = () => {
+            // 테스트 리셋 추적
+            trackEvent('Test Reset');
             setCurrentStep(0);
             setAnswers({});
             setResult(null);
@@ -301,6 +315,13 @@
           };
 
           const nextStep = () => {
+            // 질문 진행 추적
+            trackEvent('Question Answered', {
+              questionId: questions[currentStep].id,
+              questionNumber: currentStep + 1,
+              totalQuestions: questions.length
+            });
+
             if (currentStep < questions.length - 1) {
               setCurrentStep(currentStep + 1);
             } else {
@@ -309,6 +330,11 @@
           };
 
           const prevStep = () => {
+            // 이전 단계 추적
+            trackEvent('Question Previous', {
+              questionNumber: currentStep + 1
+            });
+
             if (currentStep > 0) {
               setCurrentStep(currentStep - 1);
             }
@@ -432,6 +458,14 @@
                 whisky.matchPercentage = Math.min(98, Math.max(65, Math.round(rawPercentage)));
               });
             }
+
+            // 테스트 완료 추적
+            trackEvent('Test Completed', {
+              topWhisky: recommendations[0].name,
+              matchPercentage: recommendations[0].matchPercentage,
+              region: recommendations[0].region,
+              totalAnswers: Object.keys(answers).length
+            });
 
             setResult(recommendations);
             setCurrentScreen('result');
@@ -559,45 +593,31 @@
             return canvas;
           };
 
-          const shareToInstagram = async () => {
-            try {
-              const topWhisky = result[0];
-              const shareUrl = window.location.href;
-              const shareText = `🥃 나만의 위스키 찾기!\n\n추천: ${topWhisky.name}\n매칭도: ${topWhisky.matchPercentage}%`;
-              
-              if (navigator.share && navigator.canShare) {
-                const canvas = generateResultImage();
-                
-                canvas.toBlob(async (blob) => {
-                  const shareData = {
-                    title: '🥃 나만의 위스키 찾기 결과',
-                    text: shareText,
-                    url: shareUrl,
-                    files: [file]
-                  };
-                  
-                  if (navigator.canShare(shareData)) {
-                    try {
-                      await navigator.share(shareData);
-                    } catch (error) {
-                      fallbackInstagramShare();
-                    }
-                  } else {
-                    fallbackInstagramShare();
-                  }
-                }, 'image/png');
-              } else {
-                fallbackInstagramShare();
-              }
-            } catch (error) {
-              fallbackInstagramShare();
-            }
-          };
+          const shareToInstagram = () => {
+            // 공유 클릭 추적
+            trackEvent('Instagram Share Click', {
+              topWhisky: result[0].name,
+              matchPercentage: result[0].matchPercentage
+            });
 
-          const fallbackInstagramShare = () => {
-            const canvas = generateResultImage();
             const topWhisky = result[0];
+            const serviceUrl = window.location.href;
             
+            // 1단계: 스토리용 텍스트 준비
+            const shareText = `🥃 나만의 위스키 찾기!
+
+🏆 내 추천: ${topWhisky.name}
+📊 매칭도: ${topWhisky.matchPercentage}%
+📍 지역: ${topWhisky.region}
+
+${topWhisky.description}
+
+#위스키추천 #MBTI #취향테스트 #${topWhisky.name.replace(/\s+/g, '')} #위스키입문 #술추천
+
+👆 친구들도 테스트해보세요!`;
+
+            // 2단계: 이미지 다운로드
+            const canvas = generateResultImage();
             canvas.toBlob((blob) => {
               const url = URL.createObjectURL(blob);
               const link = document.createElement('a');
@@ -607,33 +627,47 @@
               link.click();
               document.body.removeChild(link);
               URL.revokeObjectURL(url);
-              
-              setTimeout(() => {
-                if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                  const instagramStoryUrl = 'instagram://story-camera';
-                  window.location.href = instagramStoryUrl;
-                  
-                  setTimeout(() => {
-                    window.open('https://www.instagram.com/stories/create/', '_blank');
-                  }, 2000);
-                } else {
-                  window.open('https://www.instagram.com/stories/create/', '_blank');
-                }
-                
-                alert('📸 이미지가 다운로드되었습니다!\n인스타그램 스토리에서 갤러리에서 선택하여 업로드해주세요.');
-              }, 500);
-            }, 'image/png');
-          };
 
-          const shareToKakao = () => {
-            const topWhisky = result[0];
-            const shareText = `🥃 나만의 위스키 찾기!\n\n내 추천: ${topWhisky.name}\n매칭도: ${topWhisky.matchPercentage}%\n\n${topWhisky.description}\n\n당신도 테스트해보세요: ${window.location.href}`;
-            
-            if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+              // 이미지 다운로드 추적
+              trackEvent('Result Image Downloaded', {
+                whiskyName: topWhisky.name
+              });
+
+              // 3단계: 텍스트 복사
               navigator.clipboard.writeText(shareText).then(() => {
-                window.location.href = 'kakaotalk://';
-                alert('💬 텍스트가 복사되었습니다!\n카카오톡에서 친구에게 보내주세요.');
+                // 4단계: URL 추가 복사 옵션
+                setTimeout(() => {
+                  if (confirm(`📋 스토리용 텍스트가 복사되었습니다!
+
+📱 인스타그램 스토리 게시 방법:
+1. 📷 갤러리에서 다운로드된 이미지 선택
+2. 📝 복사된 텍스트 붙여넣기
+3. 😊 스티커 아이콘 터치
+4. 🔗 '링크' 스티커 선택
+
+지금 서비스 URL도 함께 복사할까요?
+링크 스티커에 붙여넣으면 클릭 가능해요!`)) {
+                    
+                    navigator.clipboard.writeText(serviceUrl).then(() => {
+                      // URL 복사 추적
+                      trackEvent('Service URL Copied');
+                      showInstagramGuide(serviceUrl);
+                    }).catch(() => {
+                      // 클립보드 실패 시 대체 방법
+                      const textArea = document.createElement('textarea');
+                      textArea.value = serviceUrl;
+                      document.body.appendChild(textArea);
+                      textArea.select();
+                      document.execCommand('copy');
+                      document.body.removeChild(textArea);
+                      showInstagramGuide(serviceUrl);
+                    });
+                  } else {
+                    showInstagramGuideWithoutUrl();
+                  }
+                }, 1000);
               }).catch(() => {
+                // 클립보드 실패 시 대체 방법
                 const textArea = document.createElement('textarea');
                 textArea.value = shareText;
                 document.body.appendChild(textArea);
@@ -641,19 +675,62 @@
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
                 
-                window.location.href = 'kakaotalk://';
-                alert('💬 텍스트가 복사되었습니다!\n카카오톡에서 친구에게 보내주세요.');
+                setTimeout(() => {
+                  alert('📋 텍스트가 복사되었습니다!\n인스타그램 스토리 게시 방법을 확인해주세요.');
+                  showInstagramGuideWithoutUrl();
+                }, 500);
               });
-            } else {
-              navigator.clipboard.writeText(shareText).then(() => {
-                window.open('https://web.kakao.com/', '_blank');
-                alert('💬 텍스트가 복사되었습니다!\n카카오톡에서 친구에게 보내주세요.');
-              }).catch(() => {
-                window.open('https://web.kakao.com/', '_blank');
-                alert('💬 카카오톡 웹에서 친구에게 결과를 공유해주세요!');
-              });
-            }
+
+              // 5단계: 인스타그램 앱 실행
+              setTimeout(() => {
+                if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                  window.location.href = 'instagram://story-camera';
+                  setTimeout(() => {
+                    window.open('https://www.instagram.com/stories/create/', '_blank');
+                  }, 2000);
+                } else {
+                  window.open('https://www.instagram.com/stories/create/', '_blank');
+                }
+              }, 2500);
+            }, 'image/png');
           };
+
+          const showInstagramGuide = (url) => {
+            // 가이드 표시 추적
+            trackEvent('Instagram Guide Shown', { includesUrl: true });
+            
+            alert(`🔗 서비스 URL이 복사되었습니다!
+
+📱 완전한 스토리 게시 가이드:
+1. 📷 갤러리에서 이미지 선택
+2. 📝 텍스트 붙여넣기 (길게 누르기)
+3. 😊 스티커 아이콘 터치
+4. 🔗 '링크' 스티커 선택
+5. 📋 URL 붙여넣기: ${url}
+6. 🎯 링크 스티커를 이미지 상단에 배치
+7. 📤 스토리 게시!
+
+💡 팁: 링크 스티커가 있으면 친구들이 바로 테스트할 수 있어요!`);
+          };
+
+          const showInstagramGuideWithoutUrl = () => {
+            // 가이드 표시 추적
+            trackEvent('Instagram Guide Shown', { includesUrl: false });
+            
+            alert(`📱 인스타그램 스토리 게시 가이드:
+
+1. 📷 갤러리에서 다운로드된 이미지 선택
+2. 📝 복사된 텍스트 붙여넣기 (길게 누르기)
+3. 😊 스티커 아이콘 터치
+4. 🔗 '링크' 스티커 선택
+5. ⌨️ URL 직접 입력: ${window.location.href}
+6. 🎯 링크 스티커를 이미지 상단에 배치
+7. 📤 스토리 게시!
+
+💡 팁: 링크 스티커가 있으면 친구들이 바로 클릭해서 테스트할 수 있어요!`);
+          };
+
+
 
           // 랜딩 페이지
           if (currentScreen === 'landing') {
@@ -874,22 +951,10 @@
                       <h4 className="text-lg font-bold text-gray-800 mb-4">📢 결과 공유하기</h4>
                       <div className="flex flex-wrap justify-center gap-3">
                         <button
-                          onClick={shareResult}
-                          className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
-                        >
-                          📤 공유하기
-                        </button>
-                        <button
                           onClick={shareToInstagram}
                           className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:from-pink-600 hover:to-purple-600 transition-colors text-sm font-medium"
                         >
-                          📸 인스타그램
-                        </button>
-                        <button
-                          onClick={shareToKakao}
-                          className="flex items-center gap-2 bg-yellow-400 text-gray-800 px-4 py-2 rounded-lg hover:bg-yellow-500 transition-colors text-sm font-medium"
-                        >
-                          💬 카카오톡
+                          📸 인스타그램 스토리
                         </button>
                       </div>
                     </div>
