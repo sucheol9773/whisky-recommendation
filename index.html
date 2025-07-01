@@ -506,95 +506,170 @@
 
           const generateResultImage = () => {
             const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            // 캔버스 크기 설정 (인스타그램 스토리 비율: 9:16)
             canvas.width = 1080;
-            canvas.height = 1920;
+            canvas.height = 1920; // 9:16 비율
+            const ctx = canvas.getContext('2d');
             
             const topWhisky = result[0];
             
-            // 배경 그라데이션
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#FEF3C7'); // amber-100
-            gradient.addColorStop(1, '#FED7AA'); // orange-200
+            // 배경 그라데이션 (amber-400 → orange-500 → red-500)
+            const gradient = ctx.createLinearGradient(0, 0, 1080, 1920);
+            gradient.addColorStop(0, '#FBBF24'); // amber-400
+            gradient.addColorStop(0.5, '#F97316'); // orange-500  
+            gradient.addColorStop(1, '#EF4444'); // red-500
             ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, 1080, 1920);
             
-            // 메인 배경 카드
+            // 배경 장식 이모지들 (반투명)
+            ctx.globalAlpha = 0.15;
+            ctx.font = '120px Arial';
             ctx.fillStyle = '#FFFFFF';
-            ctx.roundRect = function(x, y, w, h, r) {
-              this.beginPath();
-              this.moveTo(x + r, y);
-              this.lineTo(x + w - r, y);
-              this.quadraticCurveTo(x + w, y, x + w, y + r);
-              this.lineTo(x + w, y + h - r);
-              this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-              this.lineTo(x + r, y + h);
-              this.quadraticCurveTo(x, y + h, x, y + h - r);
-              this.lineTo(x, y + r);
-              this.quadraticCurveTo(x, y, x + r, y);
-              this.closePath();
+            ctx.textAlign = 'center';
+            
+            // 위스키 🥃
+            ctx.fillText('🥃', 200, 200);
+            // 별 ✨  
+            ctx.fillText('✨', 880, 350);
+            // 불 🔥
+            ctx.fillText('🔥', 200, 1600);
+            // 별 ⭐
+            ctx.fillText('⭐', 880, 1750);
+            
+            ctx.globalAlpha = 1.0;
+            
+            // 헤더 영역
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+            ctx.font = '120px Arial';
+            ctx.fillText('🥃', 540, 280);
+            
+            ctx.font = 'bold 50px Arial, sans-serif';
+            ctx.fillText('나만의 위스키 찾기', 540, 360);
+            
+            ctx.font = '36px Arial, sans-serif';
+            ctx.globalAlpha = 0.9;
+            ctx.fillText('MBTI 스타일 취향 분석 완료!', 540, 420);
+            ctx.globalAlpha = 1.0;
+            
+            // 중앙 카드 (반투명 흰색)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+            ctx.shadowBlur = 30;
+            ctx.shadowOffsetY = 10;
+            
+            // roundRect 구현 (Canvas 호환성)
+            const drawRoundRect = (x, y, width, height, radius) => {
+              ctx.beginPath();
+              ctx.moveTo(x + radius, y);
+              ctx.lineTo(x + width - radius, y);
+              ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+              ctx.lineTo(x + width, y + height - radius);
+              ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+              ctx.lineTo(x + radius, y + height);
+              ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+              ctx.lineTo(x, y + radius);
+              ctx.quadraticCurveTo(x, y, x + radius, y);
+              ctx.closePath();
             };
             
-            ctx.roundRect(80, 200, 920, 1500, 40);
+            drawRoundRect(90, 500, 900, 800, 50);
             ctx.fill();
             
-            // 제목
             ctx.shadowColor = 'transparent';
-            ctx.fillStyle = '#92400E';
-            ctx.textAlign = 'center';
-            ctx.font = 'bold 80px Arial';
-            ctx.fillText('🥃', 540, 350);
             
-            ctx.font = 'bold 64px Arial';
-            ctx.fillText('나만의 위스키 찾기', 540, 450);
+            // 트로피 이모지
+            ctx.font = '80px Arial';
+            ctx.fillStyle = '#FBBF24';
+            ctx.fillText('🏆', 540, 590);
             
-            // 결과 제목
-            ctx.font = 'bold 48px Arial';
-            ctx.fillStyle = '#D97706';
-            ctx.fillText('추천 결과', 540, 580);
-            
-            // 1위 뱃지
-            ctx.fillStyle = '#F59E0B';
-            ctx.beginPath();
-            ctx.arc(200, 720, 40, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = 'bold 36px Arial';
-            ctx.fillText('1', 200, 735);
+            // "당신의 위스키는" 텍스트
+            ctx.font = 'bold 40px Arial, sans-serif';
+            ctx.fillStyle = '#374151';
+            ctx.fillText('당신의 위스키는', 540, 660);
             
             // 위스키 이름
-            ctx.fillStyle = '#92400E';
-            ctx.font = 'bold 56px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillText(topWhisky.name, 280, 735);
+            ctx.font = 'bold 60px Arial, sans-serif';
+            ctx.fillStyle = '#D97706';
+            ctx.fillText(topWhisky.name, 540, 730);
             
-            // 매칭도
-            ctx.fillStyle = '#F59E0B';
-            ctx.font = 'bold 42px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(`매칭도: ${topWhisky.matchPercentage}%`, 540, 820);
+            // 원형 매칭도 게이지
+            const centerX = 540;
+            const centerY = 820;
+            const radius = 60;
             
-            // 지역 정보
-            ctx.fillStyle = '#6B7280';
-            ctx.font = '36px Arial';
-            ctx.fillText(`📍 ${topWhisky.region}`, 540, 980);
+            // 외부 원 (그라데이션)
+            const gaugeGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+            gaugeGradient.addColorStop(0, '#FBBF24');
+            gaugeGradient.addColorStop(1, '#F97316');
+            ctx.fillStyle = gaugeGradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fill();
             
-            // 설명
+            // 내부 원 (흰색)
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius - 10, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 매칭도 텍스트
+            ctx.font = 'bold 32px Arial, sans-serif';
+            ctx.fillStyle = '#D97706';
+            ctx.fillText(`${topWhisky.matchPercentage}%`, centerX, centerY + 10);
+            
+            // 위스키 정보들
+            const infoY = 950;
+            const infoSpacing = 60;
+            
+            ctx.font = 'bold 32px Arial, sans-serif';
             ctx.fillStyle = '#374151';
-            ctx.font = '32px Arial';
-            ctx.fillText(topWhisky.description, 540, 1200);
             
-            // 하단 CTA
-            ctx.fillStyle = '#F59E0B';
-            ctx.font = 'bold 42px Arial';
-            ctx.fillText('당신의 취향은?', 540, 1550);
+            // 지역
+            ctx.fillText(`📍 ${topWhisky.region}`, 540, infoY);
             
-            ctx.fillStyle = '#92400E';
-            ctx.font = 'bold 38px Arial';
-            ctx.fillText('나만의 위스키 찾기 테스트', 540, 1610);
+            // 도수
+            ctx.fillText(`⚡ 도수 ${topWhisky.abv}%`, 540, infoY + infoSpacing);
+            
+            // 가격
+            ctx.fillText(`💰 ${topWhisky.price}`, 540, infoY + infoSpacing * 2);
+            
+            // 설명 박스
+            ctx.fillStyle = 'rgba(251, 191, 36, 0.1)';
+            drawRoundRect(120, 1150, 840, 120, 25);
+            ctx.fill();
+            
+            // 설명 텍스트 (여러 줄 처리)
+            ctx.font = '24px Arial, sans-serif';
+            ctx.fillStyle = '#374151';
+            const words = topWhisky.description.split(' ');
+            let line = '';
+            let lineY = 1190;
+            const maxWidth = 800;
+            
+            for (let n = 0; n < words.length; n++) {
+              const testLine = line + words[n] + ' ';
+              const metrics = ctx.measureText(testLine);
+              const testWidth = metrics.width;
+              
+              if (testWidth > maxWidth && n > 0) {
+                ctx.fillText(line, 540, lineY);
+                line = words[n] + ' ';
+                lineY += 30;
+              } else {
+                line = testLine;
+              }
+            }
+            ctx.fillText(line, 540, lineY);
+            
+            // 하단 CTA 영역
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 36px Arial, sans-serif';
+            ctx.fillText('🎯 나도 테스트해보기', 540, 1420);
+            
+            ctx.font = '28px Arial, sans-serif';
+            ctx.globalAlpha = 0.9;
+            ctx.fillText('whisky-recommendation.vercel.app', 540, 1470);
+            ctx.globalAlpha = 1.0;
             
             return canvas;
           };
