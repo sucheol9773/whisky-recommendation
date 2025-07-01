@@ -38,7 +38,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
 
         // Analytics 추적 함수
         const trackEvent = (eventName, properties = {}) => {
@@ -61,6 +61,39 @@
           const [currentStep, setCurrentStep] = useState(0);
           const [answers, setAnswers] = useState({});
           const [result, setResult] = useState(null);
+
+          // 페이지 로드 시 localStorage에서 결과 복원
+          useEffect(() => {
+            const savedResult = localStorage.getItem('whiskyResult');
+            const fromExternal = new URLSearchParams(window.location.search).get('from');
+            
+            if (savedResult && fromExternal === 'instagram') {
+              try {
+                const parsedResult = JSON.parse(savedResult);
+                setResult(parsedResult);
+                setCurrentScreen('result');
+                // 사용한 데이터 삭제
+                localStorage.removeItem('whiskyResult');
+                // URL 파라미터 제거
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // 외부 브라우저에서 바로 공유 버튼 실행
+                setTimeout(() => {
+                  // 결과가 설정된 후 shareToInstagram 실행
+                  if (parsedResult && parsedResult.length > 0) {
+                    // shareToInstagram이 정의된 후 호출하기 위해 조금 더 기다림
+                    setTimeout(() => {
+                      if (typeof shareToInstagram === 'function') {
+                        shareToInstagram();
+                      }
+                    }, 500);
+                  }
+                }, 1000);
+              } catch (error) {
+                console.error('Failed to restore result:', error);
+              }
+            }
+          }, []);
 
           const startTest = () => {
             // 테스트 시작 추적
@@ -614,27 +647,43 @@
               const dataURL = canvas.toDataURL('image/png');
               
               if (isInstagramBrowser) {
-                // 인스타그램 앱 내 브라우저인 경우 - 바로 외부 브라우저로 리다이렉트
+                // 인스타그램 앱 내 브라우저인 경우 - 결과 저장 후 외부 브라우저로 이동
                 trackEvent('Instagram Browser Detected - Redirecting');
+                
+                // 결과 데이터를 localStorage에 저장
+                localStorage.setItem('whiskyResult', JSON.stringify(result));
                 
                 alert(`📱 인스타그램 앱에서 접속하셨네요!
 
 더 편리한 이용을 위해 외부 브라우저(Safari/Chrome)로 연결합니다.
 
-✅ 외부 브라우저에서는:
+✅ 외부 브라우저에서 자동으로:
+• 결과 화면 표시
 • 이미지 자동 다운로드
 • 링크 자동 복사  
 • 인스타그램 자동 연결
 
 🚀 "확인"을 누르면 외부 브라우저로 이동합니다!`);
                 
-                // 외부 브라우저로 리다이렉트
-                window.open('https://whisky-recommendation.vercel.app/', '_blank');
+                // 외부 브라우저로 이동 (여러 방법 시도)
+                const externalUrl = 'https://whisky-recommendation.vercel.app/?from=instagram';
                 
-                // 현재 창에서도 이동 (백업)
+                // 방법 1: 새 창으로 열기
+                const newWindow = window.open(externalUrl, '_blank');
+                
+                // 방법 2: 시스템 브라우저로 열기 (모바일)
                 setTimeout(() => {
-                  window.location.href = 'https://whisky-recommendation.vercel.app/';
-                }, 1000);
+                  if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                    window.location.href = externalUrl;
+                  }
+                }, 500);
+                
+                // 방법 3: 백업 - 현재 창에서 이동
+                setTimeout(() => {
+                  if (!newWindow || newWindow.closed) {
+                    window.location.href = externalUrl;
+                  }
+                }, 2000);
                 
               } else {
                 // 일반 브라우저인 경우 (기존 로직)
