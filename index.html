@@ -620,71 +620,69 @@
                 whiskyName: topWhisky.name
               });
 
-              // 2단계: 브라우저 이벤트 기반으로 다운로드 완료 감지
-              let eventListenerAdded = false;
-              
-              const handleUserReturn = () => {
-                if (eventListenerAdded) return;
-                eventListenerAdded = true;
+              // 2단계: 사용자 확인 후 링크 복사
+              setTimeout(() => {
+                const userConfirmed = confirm(`📷 이미지 다운로드가 시작되었습니다!
+
+다운로드가 완료되었다면 "확인"을 클릭하세요.
+링크가 자동으로 복사됩니다.
+
+📱 다운로드 완료 후 확인을 클릭하세요!`);
                 
-                // 이벤트 리스너 제거
-                window.removeEventListener('focus', handleUserReturn);
-                document.removeEventListener('visibilitychange', handleVisibilityChange);
-                
-                // 서비스 URL만 복사 (단순화된 내용)
-                navigator.clipboard.writeText(serviceUrl).then(() => {
-                  trackEvent('Service URL Copied');
-                  
-                  // 안내 메시지 표시
-                  alert(`✅ 링크가 복사되었습니다!
+                if (userConfirmed) {
+                  // 링크 자동 복사
+                  navigator.clipboard.writeText(serviceUrl).then(() => {
+                    trackEvent('Service URL Copied');
+                    
+                    alert(`✅ 링크가 자동으로 복사되었습니다!
+
+📱 인스타그램 스토리에서:
+1. 📷 갤러리에서 다운로드한 이미지 선택
+2. ✏️ 원하는 텍스트 작성  
+3. 🔗 링크 스티커 추가 → 복사된 링크 붙여넣기
+4. 📤 스토리 게시!
+
+인스타그램이 자동으로 열립니다...`);
+                    
+                    // 인스타그램 실행
+                    setTimeout(() => {
+                      if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                        window.location.href = 'instagram://story-camera';
+                      } else {
+                        window.open('https://www.instagram.com/stories/create/', '_blank');
+                      }
+                    }, 1500);
+                    
+                  }).catch(() => {
+                    // 클립보드 실패 시 대체 방법 (자동 선택)
+                    const textArea = document.createElement('textarea');
+                    textArea.value = serviceUrl;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    alert(`✅ 링크가 복사되었습니다!
 
 📱 인스타그램 스토리에서:
 1. 📷 갤러리에서 다운로드한 이미지 선택
 2. ✏️ 원하는 텍스트 작성
 3. 🔗 링크 스티커 추가 → 복사된 링크 붙여넣기
-4. 📤 스토리 게시!`);
-                  
-                  // 안내 후 인스타그램 실행
-                  setTimeout(() => {
-                    if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                      window.location.href = 'instagram://story-camera';
-                    } else {
-                      window.open('https://www.instagram.com/stories/create/', '_blank');
-                    }
-                  }, 1000);
-                }).catch(() => {
-                  // 클립보드 실패 시 대체 방법
-                  alert(`🔗 링크를 수동으로 복사해주세요:
-${serviceUrl}
+4. 📤 스토리 게시!
 
-📱 인스타그램 스토리에서 링크 스티커에 붙여넣어주세요!`);
-                  
-                  setTimeout(() => {
-                    if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                      window.location.href = 'instagram://story-camera';
-                    } else {
-                      window.open('https://www.instagram.com/stories/create/', '_blank');
-                    }
-                  }, 1000);
-                });
-              };
-              
-              const handleVisibilityChange = () => {
-                if (!document.hidden) {
-                  handleUserReturn();
+인스타그램이 자동으로 열립니다...`);
+                    
+                    // 인스타그램 실행
+                    setTimeout(() => {
+                      if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                        window.location.href = 'instagram://story-camera';
+                      } else {
+                        window.open('https://www.instagram.com/stories/create/', '_blank');
+                      }
+                    }, 1500);
+                  });
                 }
-              };
-
-              // 브라우저 포커스와 가시성 변화 감지
-              window.addEventListener('focus', handleUserReturn);
-              document.addEventListener('visibilitychange', handleVisibilityChange);
-              
-              // 백업: 5초 후에도 이벤트가 발생하지 않으면 강제 실행
-              setTimeout(() => {
-                if (!eventListenerAdded) {
-                  handleUserReturn();
-                }
-              }, 5000);
+              }, 1000); // 1초 후 확인 대화상자 표시
               
             }, 'image/png');
           };
