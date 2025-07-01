@@ -581,21 +581,21 @@
             // 트로피 이모지 - 상단 여백 확장
             ctx.font = '80px Arial';
             ctx.fillStyle = '#FBBF24';
-            ctx.fillText('🏆', 540, 660);
+            ctx.fillText('🏆', 540, 620);
             
             // "당신의 위스키는" 텍스트 - 간격 조정
             ctx.font = 'bold 40px Arial, sans-serif';
             ctx.fillStyle = '#374151';
-            ctx.fillText('당신의 위스키는', 540, 740);
+            ctx.fillText('당신의 위스키는', 540, 700);
             
             // 위스키 이름 - 간격 조정
             ctx.font = 'bold 60px Arial, sans-serif';
             ctx.fillStyle = '#D97706';
-            ctx.fillText(topWhisky.name, 540, 830);
+            ctx.fillText(topWhisky.name, 540, 780);
             
             // 원형 매칭도 게이지 - 위치 조정
             const centerX = 540;
-            const centerY = 930;
+            const centerY = 870;
             const radius = 60;
             
             // 외부 원 (그라데이션)
@@ -619,8 +619,8 @@
             ctx.fillText(`${topWhisky.matchPercentage}%`, centerX, centerY + 10);
             
             // 위스키 정보들 - 위치와 간격 조정
-            const infoY = 1030;
-            const infoSpacing = 50;
+            const infoY = 970;
+            const infoSpacing = 45;
             
             ctx.font = 'bold 32px Arial, sans-serif';
             ctx.fillStyle = '#374151';
@@ -634,9 +634,9 @@
             // 가격
             ctx.fillText(`💰 ${topWhisky.price}`, 540, infoY + infoSpacing * 2);
             
-            // 설명 박스 - 하단 여백 조정하여 대칭 만들기 (상단 180px = 하단 180px)
+            // 설명 박스 - 하단 여백 조정하여 대칭 만들기
             ctx.fillStyle = 'rgba(251, 191, 36, 0.1)';
-            drawRoundRect(120, 1080, 840, 100, 25);
+            drawRoundRect(120, 1180, 840, 80, 25);
             ctx.fill();
             
             // 설명 텍스트 (여러 줄 처리) - 위치 조정
@@ -644,7 +644,7 @@
             ctx.fillStyle = '#374151';
             const words = topWhisky.description.split(' ');
             let line = '';
-            let lineY = 1110;
+            let lineY = 1205;
             const maxWidth = 800;
             
             for (let n = 0; n < words.length; n++) {
