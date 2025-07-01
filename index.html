@@ -614,90 +614,27 @@
               const dataURL = canvas.toDataURL('image/png');
               
               if (isInstagramBrowser) {
-                // 인스타그램 앱 내 브라우저인 경우
-                // 링크 복사
-                navigator.clipboard.writeText(serviceUrl).then(() => {
-                  trackEvent('Service URL Copied - Instagram Browser');
-                  
-                  // 이미지를 새 탭에서 열기
-                  const imageWindow = window.open();
-                  imageWindow.document.write(`
-                    <html>
-                      <head>
-                        <title>위스키 추천 결과 이미지</title>
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <style>
-                          body { margin: 0; padding: 20px; text-align: center; background: #f5f5f5; font-family: Arial, sans-serif; }
-                          img { max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-                          .info { background: white; padding: 15px; margin: 20px auto; border-radius: 10px; max-width: 400px; }
-                          .button { background: #007AFF; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 10px; }
-                        </style>
-                      </head>
-                      <body>
-                        <h2>🥃 위스키 추천 결과</h2>
-                        <img src="${dataURL}" alt="위스키 추천 결과">
-                        <div class="info">
-                          <p><strong>📱 이미지 저장 방법:</strong></p>
-                          <p>이미지를 길게 눌러서 "사진 저장" 선택</p>
-                          <p><strong>🔗 링크가 복사되었습니다!</strong></p>
-                          <p>인스타그램 스토리에서 링크 스티커에 붙여넣으세요</p>
-                        </div>
-                      </body>
-                    </html>
-                  `);
-                  
-                  alert(`📱 인스타그램 앱에서 접속하신 것 같습니다!
+                // 인스타그램 앱 내 브라우저인 경우 - 바로 외부 브라우저로 리다이렉트
+                trackEvent('Instagram Browser Detected - Redirecting');
+                
+                alert(`📱 인스타그램 앱에서 접속하셨네요!
 
-🔗 링크가 복사되었습니다
-📷 새 탭에서 이미지가 열렸습니다
+더 편리한 이용을 위해 외부 브라우저(Safari/Chrome)로 연결합니다.
 
-📱 다음 단계:
-1. 새 탭의 이미지를 길게 눌러 저장
-2. 인스타그램 스토리 작성
-3. 갤러리에서 저장한 이미지 선택
-4. 텍스트 작성 후 링크 스티커에 복사된 링크 붙여넣기
+✅ 외부 브라우저에서는:
+• 이미지 자동 다운로드
+• 링크 자동 복사  
+• 인스타그램 자동 연결
 
-💡 더 편리한 사용을 위해 Safari나 Chrome에서 직접 접속해보세요!`);
-                  
-                }).catch(() => {
-                  // 클립보드 실패 시
-                  const imageWindow = window.open();
-                  imageWindow.document.write(`
-                    <html>
-                      <head>
-                        <title>위스키 추천 결과</title>
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <style>
-                          body { margin: 0; padding: 20px; text-align: center; background: #f5f5f5; font-family: Arial, sans-serif; }
-                          img { max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-                          .info { background: white; padding: 15px; margin: 20px auto; border-radius: 10px; max-width: 400px; }
-                          .url { background: #f0f0f0; padding: 10px; border-radius: 5px; margin: 10px 0; word-break: break-all; font-size: 14px; }
-                        </style>
-                      </head>
-                      <body>
-                        <h2>🥃 위스키 추천 결과</h2>
-                        <img src="${dataURL}" alt="위스키 추천 결과">
-                        <div class="info">
-                          <p><strong>📱 이미지 저장:</strong> 이미지를 길게 눌러 저장</p>
-                          <p><strong>🔗 링크 스티커용 URL:</strong></p>
-                          <div class="url">${serviceUrl}</div>
-                          <p>위 링크를 복사해서 인스타그램 스토리 링크 스티커에 붙여넣으세요!</p>
-                        </div>
-                      </body>
-                    </html>
-                  `);
-                  
-                  alert(`📱 인스타그램 앱에서 접속하신 것 같습니다!
-
-📷 새 탭에서 이미지가 열렸습니다
-🔗 링크 URL도 함께 표시됩니다
-
-📱 다음 단계:
-1. 새 탭의 이미지를 길게 눌러 저장
-2. 링크 URL 복사
-3. 인스타그램 스토리에서 이미지 선택
-4. 링크 스티커에 URL 붙여넣기`);
-                });
+🚀 "확인"을 누르면 외부 브라우저로 이동합니다!`);
+                
+                // 외부 브라우저로 리다이렉트
+                window.open('https://whisky-recommendation.vercel.app/', '_blank');
+                
+                // 현재 창에서도 이동 (백업)
+                setTimeout(() => {
+                  window.location.href = 'https://whisky-recommendation.vercel.app/';
+                }, 1000);
                 
               } else {
                 // 일반 브라우저인 경우 (기존 로직)
