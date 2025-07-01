@@ -603,19 +603,6 @@
             const topWhisky = result[0];
             const serviceUrl = window.location.href;
             
-            // 스토리용 텍스트 (실제 스토리에 올릴 내용)
-            const shareText = `🥃 나만의 위스키 찾기!
-
-🏆 내 추천: ${topWhisky.name}
-📊 매칭도: ${topWhisky.matchPercentage}%
-📍 지역: ${topWhisky.region}
-
-${topWhisky.description}
-
-#위스키추천 #MBTI #취향테스트 #${topWhisky.name.replace(/\s+/g, '')} #위스키입문
-
-👆 친구들도 테스트해보세요!`;
-
             // 1단계: 이미지 다운로드
             const canvas = generateResultImage();
             canvas.toBlob((blob) => {
@@ -633,52 +620,72 @@ ${topWhisky.description}
                 whiskyName: topWhisky.name
               });
 
-              // 2단계: 스토리 텍스트 복사 (선택창 없이)
-              navigator.clipboard.writeText(shareText).then(() => {
-                trackEvent('Story Text Copied');
-              }).catch(() => {
-                // 클립보드 실패 시 대체 방법
-                const textArea = document.createElement('textarea');
-                textArea.value = shareText;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-              });
-
-              // 3단계: 서비스 링크 별도 복사 (0.5초 후)
-              setTimeout(() => {
+              // 2단계: 브라우저 이벤트 기반으로 다운로드 완료 감지
+              let eventListenerAdded = false;
+              
+              const handleUserReturn = () => {
+                if (eventListenerAdded) return;
+                eventListenerAdded = true;
+                
+                // 이벤트 리스너 제거
+                window.removeEventListener('focus', handleUserReturn);
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+                
+                // 서비스 URL만 복사 (단순화된 내용)
                 navigator.clipboard.writeText(serviceUrl).then(() => {
                   trackEvent('Service URL Copied');
-                  alert(`✅ 준비 완료!
                   
-📱 다음 단계:
-1. 📷 이미지 다운로드 완료
-2. 📝 스토리 텍스트 복사 완료  
-3. 🔗 서비스 링크 복사 완료
+                  // 안내 메시지 표시
+                  alert(`✅ 링크가 복사되었습니다!
 
-이제 인스타그램 스토리에서:
-- 갤러리에서 이미지 선택
-- 텍스트 붙여넣기 (길게 누르기)
-- 링크 스티커 추가 후 링크 붙여넣기`);
+📱 인스타그램 스토리에서:
+1. 📷 갤러리에서 다운로드한 이미지 선택
+2. ✏️ 원하는 텍스트 작성
+3. 🔗 링크 스티커 추가 → 복사된 링크 붙여넣기
+4. 📤 스토리 게시!`);
+                  
+                  // 안내 후 인스타그램 실행
+                  setTimeout(() => {
+                    if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                      window.location.href = 'instagram://story-camera';
+                    } else {
+                      window.open('https://www.instagram.com/stories/create/', '_blank');
+                    }
+                  }, 1000);
                 }).catch(() => {
-                  alert(`✅ 이미지 다운로드 + 텍스트 복사 완료!
-
-🔗 링크 스티커용 URL (수동 복사):
+                  // 클립보드 실패 시 대체 방법
+                  alert(`🔗 링크를 수동으로 복사해주세요:
 ${serviceUrl}
 
-📱 인스타그램 스토리에서 링크 스티커에 위 URL을 입력해주세요!`);
+📱 인스타그램 스토리에서 링크 스티커에 붙여넣어주세요!`);
+                  
+                  setTimeout(() => {
+                    if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                      window.location.href = 'instagram://story-camera';
+                    } else {
+                      window.open('https://www.instagram.com/stories/create/', '_blank');
+                    }
+                  }, 1000);
                 });
-              }, 500);
-
-              // 4단계: 1초 후 인스타그램 실행
-              setTimeout(() => {
-                if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                  window.location.href = 'instagram://story-camera';
-                } else {
-                  window.open('https://www.instagram.com/stories/create/', '_blank');
+              };
+              
+              const handleVisibilityChange = () => {
+                if (!document.hidden) {
+                  handleUserReturn();
                 }
-              }, 2000);
+              };
+
+              // 브라우저 포커스와 가시성 변화 감지
+              window.addEventListener('focus', handleUserReturn);
+              document.addEventListener('visibilitychange', handleVisibilityChange);
+              
+              // 백업: 5초 후에도 이벤트가 발생하지 않으면 강제 실행
+              setTimeout(() => {
+                if (!eventListenerAdded) {
+                  handleUserReturn();
+                }
+              }, 5000);
+              
             }, 'image/png');
           };
 
