@@ -67,7 +67,12 @@
             const savedResult = localStorage.getItem('whiskyResult');
             const fromExternal = new URLSearchParams(window.location.search).get('from');
             
-            if (savedResult && fromExternal === 'instagram') {
+            // 인스타그램 브라우저 감지
+            const isInstagramBrowser = navigator.userAgent.includes('Instagram') || 
+                                     window.location.href.includes('instagram.com') ||
+                                     document.referrer.includes('instagram.com');
+            
+            if (savedResult && fromExternal === 'instagram' && !isInstagramBrowser) {
               try {
                 const parsedResult = JSON.parse(savedResult);
                 setResult(parsedResult);
