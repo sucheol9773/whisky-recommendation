@@ -520,7 +520,7 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, 1080, 1920);
             
-            // 배경 장식 이모지들 (반투명)
+            // 배경 장식 이모지들 (반투명) - 위치 조정
             ctx.globalAlpha = 0.15;
             ctx.font = '120px Arial';
             ctx.fillStyle = '#FFFFFF';
@@ -530,10 +530,10 @@
             ctx.fillText('🥃', 200, 200);
             // 별 ✨  
             ctx.fillText('✨', 880, 350);
-            // 불 🔥
-            ctx.fillText('🔥', 200, 1600);
-            // 별 ⭐
-            ctx.fillText('⭐', 880, 1750);
+            // 불 🔥 - 아래로 이동
+            ctx.fillText('🔥', 200, 1650);
+            // 별 ⭐ - 아래로 이동
+            ctx.fillText('⭐', 880, 1800);
             
             ctx.globalAlpha = 1.0;
             
@@ -551,7 +551,7 @@
             ctx.fillText('MBTI 스타일 취향 분석 완료!', 540, 420);
             ctx.globalAlpha = 1.0;
             
-            // 중앙 카드 (반투명 흰색)
+            // 중앙 카드 (반투명 흰색) - 크기 확장
             ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
             ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
             ctx.shadowBlur = 30;
@@ -572,29 +572,30 @@
               ctx.closePath();
             };
             
-            drawRoundRect(90, 500, 900, 800, 50);
+            // 카드 크기 확장: y:480에서 높이 880
+            drawRoundRect(90, 480, 900, 880, 50);
             ctx.fill();
             
             ctx.shadowColor = 'transparent';
             
-            // 트로피 이모지
+            // 트로피 이모지 - 위치 조정
             ctx.font = '80px Arial';
             ctx.fillStyle = '#FBBF24';
-            ctx.fillText('🏆', 540, 590);
+            ctx.fillText('🏆', 540, 570);
             
-            // "당신의 위스키는" 텍스트
+            // "당신의 위스키는" 텍스트 - 간격 조정
             ctx.font = 'bold 40px Arial, sans-serif';
             ctx.fillStyle = '#374151';
-            ctx.fillText('당신의 위스키는', 540, 660);
+            ctx.fillText('당신의 위스키는', 540, 650);
             
-            // 위스키 이름
+            // 위스키 이름 - 간격 조정
             ctx.font = 'bold 60px Arial, sans-serif';
             ctx.fillStyle = '#D97706';
-            ctx.fillText(topWhisky.name, 540, 730);
+            ctx.fillText(topWhisky.name, 540, 740);
             
-            // 원형 매칭도 게이지
+            // 원형 매칭도 게이지 - 위치 조정
             const centerX = 540;
-            const centerY = 820;
+            const centerY = 840;
             const radius = 60;
             
             // 외부 원 (그라데이션)
@@ -617,9 +618,9 @@
             ctx.fillStyle = '#D97706';
             ctx.fillText(`${topWhisky.matchPercentage}%`, centerX, centerY + 10);
             
-            // 위스키 정보들
-            const infoY = 950;
-            const infoSpacing = 60;
+            // 위스키 정보들 - 위치와 간격 조정
+            const infoY = 940;
+            const infoSpacing = 50;
             
             ctx.font = 'bold 32px Arial, sans-serif';
             ctx.fillStyle = '#374151';
@@ -633,17 +634,17 @@
             // 가격
             ctx.fillText(`💰 ${topWhisky.price}`, 540, infoY + infoSpacing * 2);
             
-            // 설명 박스
+            // 설명 박스 - 위치 조정하여 카드 안으로
             ctx.fillStyle = 'rgba(251, 191, 36, 0.1)';
-            drawRoundRect(120, 1150, 840, 120, 25);
+            drawRoundRect(120, 1120, 840, 100, 25);
             ctx.fill();
             
-            // 설명 텍스트 (여러 줄 처리)
+            // 설명 텍스트 (여러 줄 처리) - 위치 조정
             ctx.font = '24px Arial, sans-serif';
             ctx.fillStyle = '#374151';
             const words = topWhisky.description.split(' ');
             let line = '';
-            let lineY = 1190;
+            let lineY = 1150;
             const maxWidth = 800;
             
             for (let n = 0; n < words.length; n++) {
@@ -661,14 +662,14 @@
             }
             ctx.fillText(line, 540, lineY);
             
-            // 하단 CTA 영역
+            // 하단 CTA 영역 - 위치 조정하여 공백 줄이기
             ctx.fillStyle = '#FFFFFF';
             ctx.font = 'bold 36px Arial, sans-serif';
-            ctx.fillText('🎯 나도 테스트해보기', 540, 1420);
+            ctx.fillText('🎯 나도 테스트해보기', 540, 1450);
             
             ctx.font = '28px Arial, sans-serif';
             ctx.globalAlpha = 0.9;
-            ctx.fillText('whisky-recommendation.vercel.app', 540, 1470);
+            ctx.fillText('whisky-recommendation.vercel.app', 540, 1500);
             ctx.globalAlpha = 1.0;
             
             return canvas;
