@@ -1,0 +1,24 @@
+{
+  "name": "whisky-recommendation-app",
+  "version": "1.0.0",
+  "description": "위스키 맞춤 추천 시스템 - MBTI 스타일 위스키 추천 서비스",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve -s . -l 3000",
+    "build": "echo 'Build complete'",
+    "dev": "serve -s . -l 3000"
+  },
+  "keywords": [
+    "whisky",
+    "whiskey",
+    "recommendation",
+    "mbti",
+    "taste",
+    "korean"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.0.0"
+  }
+}
