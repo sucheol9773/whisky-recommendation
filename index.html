@@ -620,7 +620,7 @@
             
             // 위스키 정보들 - 위치와 간격 조정
             const infoY = 970;
-            const infoSpacing = 45;
+            const infoSpacing = 55;
             
             ctx.font = 'bold 32px Arial, sans-serif';
             ctx.fillStyle = '#374151';
@@ -639,28 +639,41 @@
             drawRoundRect(120, 1180, 840, 80, 25);
             ctx.fill();
             
-            // 설명 텍스트 (여러 줄 처리) - 위치 조정
+            // 설명 텍스트 - 박스 세로 중앙 배치 (한 줄, 길면 줄바꿈 후 중앙정렬)
             ctx.font = '24px Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
             ctx.fillStyle = '#374151';
+
+            const boxTop = 1180;
+            const boxHeight = 80;
+            const boxCenterY = boxTop + boxHeight / 2;
+            const boxPaddingX = 40; // 좌우 여백
+            const maxLineWidth = 840 - boxPaddingX * 2;
+
             const words = topWhisky.description.split(' ');
-            let line = '';
-            let lineY = 1205;
-            const maxWidth = 800;
-            
-            for (let n = 0; n < words.length; n++) {
-              const testLine = line + words[n] + ' ';
-              const metrics = ctx.measureText(testLine);
-              const testWidth = metrics.width;
-              
-              if (testWidth > maxWidth && n > 0) {
-                ctx.fillText(line, 540, lineY);
-                line = words[n] + ' ';
-                lineY += 30;
+            const lines = [];
+            let currentLine = '';
+
+            words.forEach(word => {
+              const testLine = currentLine ? currentLine + ' ' + word : word;
+              if (ctx.measureText(testLine).width > maxLineWidth) {
+                if (currentLine) lines.push(currentLine);
+                currentLine = word;
               } else {
-                line = testLine;
+                currentLine = testLine;
               }
-            }
-            ctx.fillText(line, 540, lineY);
+            });
+            if (currentLine) lines.push(currentLine);
+
+            const lineHeight = 30; // 줄 높이
+            const totalTextHeight = lineHeight * lines.length;
+            let startY = boxCenterY - totalTextHeight / 2 + lineHeight / 2;
+
+            lines.forEach(line => {
+              ctx.fillText(line, 540, startY);
+              startY += lineHeight;
+            });
             
             // 하단 CTA 영역 - 위치 조정하여 공백 줄이기
             ctx.fillStyle = '#FFFFFF';
