@@ -596,7 +596,7 @@
             // 원형 매칭도 게이지 - 위치 조정
             const centerX = 540;
             const centerY = 920; // 카드 정가운데
-            const radius = 72;   // 기존보다 20% 확대
+            const radius = 86;   // 현재보다 20% 추가 확대
             
             // 외부 원 (그라데이션)
             const gaugeGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
@@ -619,7 +619,7 @@
             ctx.fillText(`${topWhisky.matchPercentage}%`, centerX, centerY + 10);
             
             // 위스키 정보들 - 위치와 간격 조정
-            const infoY = 970;
+            const infoY = 1040;
             const infoSpacing = 70;
             
             ctx.font = 'bold 32px Arial, sans-serif';
