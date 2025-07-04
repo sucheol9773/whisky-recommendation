@@ -595,8 +595,8 @@
             
             // 원형 매칭도 게이지 - 위치 조정
             const centerX = 540;
-            const centerY = 870;
-            const radius = 60;
+            const centerY = 920; // 카드 정가운데
+            const radius = 72;   // 기존보다 20% 확대
             
             // 외부 원 (그라데이션)
             const gaugeGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
@@ -634,9 +634,9 @@
             // 가격
             ctx.fillText(`💰 ${topWhisky.price}`, 540, infoY + infoSpacing * 2);
             
-            // 설명 박스 - 하단 여백 조정하여 대칭 만들기
+            // 설명 박스 - 하단 여백 50px 줄여 카드와 간격 50 유지
             ctx.fillStyle = 'rgba(251, 191, 36, 0.1)';
-            drawRoundRect(120, 1180, 840, 80, 25);
+            drawRoundRect(120, 1230, 840, 80, 25);
             ctx.fill();
             
             // 설명 텍스트 - 박스 세로 중앙 배치 (한 줄, 길면 줄바꿈 후 중앙정렬)
@@ -645,7 +645,7 @@
             ctx.textBaseline = 'middle';
             ctx.fillStyle = '#374151';
 
-            const boxTop = 1180;
+            const boxTop = 1230;
             const boxHeight = 80;
             const boxCenterY = boxTop + boxHeight / 2;
             const boxPaddingX = 40; // 좌우 여백
